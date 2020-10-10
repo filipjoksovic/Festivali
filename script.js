@@ -83,7 +83,12 @@ $(document).ready(function () {
             });
         }
     });
-    $("#godina").change(function () {
+    $("#insertBtn").click(function(){
+        $("#insertBtn").appendTo("#insert");
+        console.log('here');
+        $("#navInsert").show();
+    });
+    $("#godina").click(function () {
         let year = Number($("#godina option:selected").val());
         $.ajax({
             url: 'main.php',
@@ -96,7 +101,7 @@ $(document).ready(function () {
             }
         });
     });
-    $("#festival").change(function () {
+    $("#festival").click(function () {
         let year = Number($("#godina option:selected").val());
         let festival = $("#festival option:selected").val();
         $.ajax({
@@ -113,10 +118,13 @@ $(document).ready(function () {
         });
     });
     let nms = [];
-    $("#dan").change(function () {
+    $("#dan").click(function () {
+        console.log('triggered');
         let year = Number($("#godina").val());
         let fest = $("#festival").val();
         let day = Number($("#dan").val());
+        console.log(day);
+        if(day != NaN){
         $.ajax({
             url: 'main.php',
             data: {
@@ -157,7 +165,7 @@ $(document).ready(function () {
                 })
             }
         })
-
+    }
     });
     $("table").on('click', 'td.name', function () {
         let year = Number($("#godina").val());

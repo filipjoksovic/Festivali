@@ -123,7 +123,7 @@ function get_days($year,$name){
         global $servername,$username,$password,$dbname,$conn;
         $select = "SELECT DISTINCT lineup_festivala.dan FROM lineup_festivala INNER JOIN festivali on lineup_festivala.idFestivala = festivali.idFestivala WHERE festivali.naziv = '"  .$name. "' AND lineup_festivala.godina =" .$year;
         $result = $conn->query($select);
-        echo "<option>Dan</option>";
+        // echo "<option>Dan</option>";
         if($result->num_rows > 0){
             while($row = $result->fetch_assoc()){
                 echo "<option>" .$row["dan"]. "</option>";
@@ -134,7 +134,7 @@ function get_festivals($number){
         global $servername,$username,$password,$dbname,$conn;
         $select = "SELECT DISTINCT festivali.naziv FROM festivali INNER JOIN lineup_festivala on lineup_festivala.idFestivala = festivali.idFestivala WHERE lineup_festivala.godina = " .$number;
         $result = $conn->query($select);
-        echo "<option>Festival</option>";
+        // echo "<option>Festival</option>";
         if($result->num_rows > 0){
             while($row = $result->fetch_assoc()){
                 echo "<option>" .$row["naziv"]. "</option>";
@@ -145,7 +145,7 @@ function get_years(){
         global $servername,$username,$password,$dbname,$conn;
         $select = "SELECT DISTINCT lineup_festivala.godina FROM lineup_festivala";
         $result = $conn->query($select);
-        echo "<option>Godina</option>";
+        // echo "<option>Godina</option>";
         if($result->num_rows > 0){
             while($row = $result->fetch_assoc()){
                 echo "<option>" .$row["godina"]. "</option>";
