@@ -41,9 +41,109 @@
             most_spent($names);
         
         }
+        else if($_GET['function'] == 'get_visitors'){
+            get_visitors();
+        }
+        else if($_GET['function'] == 'fill_years'){
+            fill_years();
+        }
+        else if($_GET['function'] == 'fill_festivals'){
+            $year = $_GET['year'];
+            fill_festivals($year);
+        }
+        else if($_GET['function'] == 'fill_days'){
+            $year = $_GET['year'];
+            $fest = $_GET['fest'];
+            fill_days($year,$fest);
+        }
+        else if($_GET['function'] == 'insert'){
+            $year = $_GET['year'];
+            $name = $_GET['name'];
+            $price = $_GET['price'];
+            $fest = $_GET['fest'];
+            $day = $_GET['day'];
+            $selectPos = "SELECT DISTINCT posetioci.idPosetioca FROM posetioci WHERE posetioci.ime = '".$name. "'";
+            $resultPos = $conn->query($selectPos);
+            $rowPos = $resultPos->fetch_assoc();
+            $idPos = $rowPos['idPosetioca'];
+            $selectFes = "SELECT DISTINCT festivali.idFestivala FROM festivali WHERE festivali.naziv = '".$fest. "'";
+            $resultFes = $conn->query($selectFes);
+            $rowFes = $resultFes->fetch_assoc();
+            $idFes = $rowFes['idFestivala'];
+            // echo "<script>console.log(".$idFes.")";
+            insert($idFes,$year,$day,$idPos,$price);
+
+        }
     }
+
+function insert($idFes,$year,$day,$idPos,$price){
+    global $servername,$dbname,$username,$password,$conn;
+    // $query = "SET FOREIGN_KEY_CHECKS=0";
+    // $conn->query($query);
+    $insert = "INSERT INTO karte(idFestivala,godina,dan,idPosetioca,cena) VALUES(".$idFes.",".$year.",".$day.",".$idPos.",".$price.")";
+    if($conn->query($insert) == TRUE){
+        echo "<h1>Added successfully</h1>";
+    }
+    else{
+        echo "<h1>Error: " . $insert . "<br>" . $conn->error."</h1>";
+    }
+    // $query = "SET FOREIGN_KEY_CHECKS=1";
+    // $conn->query($query);
+}
+
+function fill_days($year,$fest){
+    global $servername,$dbname,$username,$password,$conn;
+    $select = "SELECT DISTINCT lineup_festivala.dan FROM lineup_festivala INNER JOIN festivali on lineup_Festivala.idFestivala = festivali.idFestivala WHERE lineup_festivala.godina = ".$year. " AND festivali.naziv = '".$fest."' ORDER BY festivali.naziv ASC";
+    $result = $conn->query($select);
+    if($result->num_rows>0){
+        while($row = $result->fetch_assoc()){
+            echo "<option>".$row['dan']."</option>";
+        }
+    }
+
+}
+
+function fill_festivals($year){
+    global $servername,$dbname,$username,$password,$conn;
+    $select = "SELECT DISTINCT festivali.naziv FROM festivali INNER JOIN lineup_festivala on lineup_Festivala.idFestivala = festivali.idFestivala WHERE lineup_festivala.godina = ".$year. " ORDER BY festivali.naziv ASC";
+    $result = $conn->query($select);
+    if($result->num_rows>0){
+        while($row = $result->fetch_assoc()){
+            echo "<option>".$row['naziv']."</option>";
+        }
+    }
+
+}    
+function fill_years(){
+    global $servername,$dbname,$username,$password,$conn;
+    $select = "SELECT DISTINCT karte.godina FROM karte ORDER BY karte.godina ASC";
+    $result = $conn->query($select);
+    if($result->num_rows>0){
+        while($row = $result->fetch_assoc()){
+            echo "<option>".$row['godina']."</option>";
+        }
+    }
+
+}
+function get_visitors(){
+    global $servername,$dbname,$username,$password,$conn;
+    $select = "SELECT posetioci.ime FROM posetioci ORDER BY posetioci.ime ASC";
+    $result = $conn->query($select);
+    if($result->num_rows>0){
+        while($row = $result->fetch_assoc()){
+            echo "<option>".$row['ime']."</option>";
+        }
+    }
+
+}
 function most_spent($names){
     global $servername,$username,$password,$dbname,$conn;
+    if(strlen($names) <=0){
+        echo "<h1 style = 'text-align : center'>¯\_(ツ)_/¯</h1>";
+
+    }
+    else{
+    echo "<script>console.log(".$names.")</script>";
     $select = "SELECT posetioci.ime, SUM(karte.cena) cene FROM festivali JOIN karte on festivali.idFestivala = karte.idFestivala JOIN posetioci on karte.idPosetioca = posetioci.idPosetioca WHERE posetioci.ime IN(".$names.") Group by posetioci.ime Order by cene DESC";
     $result = $conn->query($select);
     $row = $result->fetch_assoc();
@@ -52,6 +152,7 @@ function most_spent($names){
     echo "<script>";
     echo "$('#spent-most').text('Najvise potrosio: ".$name. "(".$money."din)"."')";
     echo "</script>";
+    }
 }
 
 function get_visited($name){

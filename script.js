@@ -5,8 +5,8 @@ $(document).ready(function () {
         data: 'function=get_years',
         success: function (data) {
             $("#godina").html(data);
-        
-    // });
+
+            // });
             let year = 1988;
             let festival = 'Arsenal';
             let day = 1;
@@ -57,7 +57,7 @@ $(document).ready(function () {
                                         success: function (data) {
                                             $("#visitor").text("Poseceni festivali za: " + name);
                                             $("#festivals").html(data);
-                                          
+
                                             $.ajax({
                                                 url: 'main.php',
                                                 data: {
@@ -83,10 +83,95 @@ $(document).ready(function () {
             });
         }
     });
-    $("#insertBtn").click(function(){
-        $("#insertBtn").appendTo("#insert");
-        console.log('here');
-        $("#navInsert").show();
+    $("#posFes").click(function () {
+        let year = Number($("#posGod :selected").val());
+        let fest = $("#posFes :selected").val();
+        console.log(year,fest);
+        $.ajax({
+
+            url: 'main.php',
+            data: {
+                function: "fill_days",
+                year: year,
+                fest: fest
+            },
+            success: function (data) {
+                $("#posDan").html(data);
+            }
+
+        })
+    });
+    $("#posGod").click(function () {
+        let year = Number($("#posGod :selected").val());
+        console.log(year);
+        $.ajax({
+            url: 'main.php',
+            data: {
+                function: "fill_festivals",
+                year: year
+            },
+            success: function (data) {
+                $("#posFes").html(data);
+
+            }
+        })
+    });
+    $("#showAddUsers").click(function () {
+        if ($("#addUsers").css('display') == 'none') {
+            $("#addUsers").show();
+            $.ajax({
+                url: 'main.php',
+                data: {
+                    function: "get_visitors"
+                },
+                success: function (data) {
+                    $("#posetilac").html(data);
+                    $.ajax({
+                        url: 'main.php',
+                        data: {
+                            function: "fill_years"
+                        },
+                        success: function (data) {
+                            $("#posGod").html(data);
+
+                        }
+                    })
+                }
+            })
+        } else {
+            $("#addUsers").hide();
+        }
+    });
+    $("#showSelFest").click(function () {
+        if ($("#selFest").css('display') == 'none') {
+            $("#selFest").show();
+        } else {
+            $("#selFest").hide();
+        }
+    })
+
+    $("#insertBtn").click(function () {
+        let year = Number($("#posGod :selected").val());
+        let fest = $("#posFes :selected").val();
+        let name = $("#posetilac :selected").val();
+        let day = $("#posDan :selected").val();
+        let price = $("#cena").val();
+
+
+        $.ajax({
+            url:'main.php',
+            data:{
+                function: "insert",
+                year:year,
+                fest:fest,
+                name:name,
+                price:price,
+                day:day
+            },
+            success:function(data){
+                $("#status").html(data);
+            }
+        })
     });
     $("#godina").click(function () {
         let year = Number($("#godina option:selected").val());
@@ -124,48 +209,48 @@ $(document).ready(function () {
         let fest = $("#festival").val();
         let day = Number($("#dan").val());
         console.log(day);
-        if(day != NaN){
-        $.ajax({
-            url: 'main.php',
-            data: {
-                function: "get_names",
-                year: year,
-                fest: fest,
-                day: day
-            },
-            success: function (data) {
-                $("#names").html(data);
-                let name = $("#names")[0].rows[1].cells[1].innerHTML;
-                $.ajax({
-                    url: 'main.php',
-                    data: {
-                        function: "get_visited",
-                        name: name,
-                        year: year,
-                        fest: fest,
-                        day: day
-                    },
-                    success: function (data) {
-                        $("#visitor").text("Poseceni festivali za: " + name);
-                        $("#festivals").html(data);
-                        $.ajax({
-                            url: 'main.php',
-                            data: {
-                                function: "most_spent",
-                                names: getNames()
-                            },
-                            success: function (data) {
-                                console.log(nms);
-                                $("#spent-most").html(data);
-                                nms = [];
+        if (day != NaN) {
+            $.ajax({
+                url: 'main.php',
+                data: {
+                    function: "get_names",
+                    year: year,
+                    fest: fest,
+                    day: day
+                },
+                success: function (data) {
+                    $("#names").html(data);
+                    let name = $("#names")[0].rows[1].cells[1].innerHTML;
+                    $.ajax({
+                        url: 'main.php',
+                        data: {
+                            function: "get_visited",
+                            name: name,
+                            year: year,
+                            fest: fest,
+                            day: day
+                        },
+                        success: function (data) {
+                            $("#visitor").text("Poseceni festivali za: " + name);
+                            $("#festivals").html(data);
+                            $.ajax({
+                                url: 'main.php',
+                                data: {
+                                    function: "most_spent",
+                                    names: getNames()
+                                },
+                                success: function (data) {
+                                    console.log(nms);
+                                    $("#spent-most").html(data);
+                                    nms = [];
 
-                            }
-                        })
-                    }
-                })
-            }
-        })
-    }
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
     });
     $("table").on('click', 'td.name', function () {
         let year = Number($("#godina").val());
@@ -191,7 +276,7 @@ $(document).ready(function () {
     $("#search").keyup(function () {
         let searchText = $("#search").val();
         search(searchText);
-           $.ajax({
+        $.ajax({
             url: 'main.php',
             data: {
                 function: "most_spent",
@@ -209,21 +294,22 @@ $(document).ready(function () {
         let searchText = $("#search").val();
         search(searchText);
     });
-    function getNames(){
+
+    function getNames() {
         let names = $(".name");
         let nms = [];
         let rows = $(".name");
         for (let i = 0; i < rows.length; i++) {
-            if($(".name")[i].parentElement.hidden == false){
-            let name = "'" + rows[i].innerHTML.toString() + "'";
-            nms.push(name);
+            if ($(".name")[i].parentElement.hidden == false) {
+                let name = "'" + rows[i].innerHTML.toString() + "'";
+                nms.push(name);
             }
         }
-        console.log(nms);   
+        console.log(nms);
         nms = nms.toString();
         return nms
     }
-    
+
     function search(sT) {
         let table = $(".name");
         let c;
@@ -249,4 +335,3 @@ $(document).ready(function () {
         }
     }
 });
-
